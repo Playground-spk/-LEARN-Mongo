@@ -13,7 +13,7 @@ const TestRouter = require("./routes/Test");
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-app.use("/test", TestRouter);
+app.use("/api/v1/tests", TestRouter);
 
 mongoose
   .connect(DB, {
@@ -23,7 +23,7 @@ mongoose
     useUnifiedTopology: true,
   })
   .then((con) => {
-    console.log(con.connection);
+    //console.log(con.connection);
     console.log("db connection successful");
   });
 
