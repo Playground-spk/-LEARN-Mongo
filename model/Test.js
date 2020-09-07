@@ -6,7 +6,7 @@ const testSchema = mongoose.Schema({
     required: [true, "name is must define"],
     trim: true,
   },
-  durations: {
+  duration: {
     type: Number,
     required: [true, "A test must have a duration "],
   },

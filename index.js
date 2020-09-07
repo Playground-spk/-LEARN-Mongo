@@ -8,10 +8,9 @@ const DB = process.env.DATABASE.replace(
   process.env.DATABASE_PASSWORD
 );
 
-const TestRouter = require("./routes/Test");
-
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+const TestRouter = require("./routes/Test");
 
 app.use("/api/v1/tests", TestRouter);
 
