@@ -1,9 +1,33 @@
 const testModel = require("../model/Test");
 const { db } = require("../model/Test");
+const { json } = require("express");
 
 const getAllTest = async (req, res) => {
   try {
-    const tests = await testModel.find();
+    /* build query */
+    // 1) filtering
+    const queryObj = { ...req.query };
+    const excludedFields = ["page", "sort", "limit", "fields"];
+    //make queryObj keep only filter object such as {name : 'tare'}
+    excludedFields.forEach((el) => delete queryObj[el]);
+
+    // 2) advance filtering
+
+    let queryStr = JSON.stringify(queryObj);
+    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+    queryStr = JSON.parse(queryStr);
+
+    const query = testModel.find(queryStr);
+
+    /* execute query */
+    const tests = await query;
+
+    // const test = await testModel
+    //   .find()
+    //   .where("duration")
+    //   .equals(5)
+    //   .where("difficulty")
+    //   .equals("easy");
 
     res.status(200).json({
       status: "success",
@@ -14,7 +38,7 @@ const getAllTest = async (req, res) => {
     });
   } catch (error) {
     res.status(404).json({
-      status: "fail",
+      status: error,
     });
   }
 };
