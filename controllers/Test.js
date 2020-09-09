@@ -5,19 +5,38 @@ const { json } = require("express");
 const getAllTest = async (req, res) => {
   try {
     /* build query */
-    // 1) filtering
+    // 1A) filtering
     const queryObj = { ...req.query };
     const excludedFields = ["page", "sort", "limit", "fields"];
     //make queryObj keep only filter object such as {name : 'tare'}
     excludedFields.forEach((el) => delete queryObj[el]);
 
-    // 2) advance filtering
+    // 1B) advance filtering
 
     let queryStr = JSON.stringify(queryObj);
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
     queryStr = JSON.parse(queryStr);
 
-    const query = testModel.find(queryStr);
+    let query = testModel.find(queryStr);
+
+    // 2) Sorting
+
+    if (req.query.sort) {
+      let sortBy = req.query.sort.split(",").join(" ");
+
+      query = query.sort(sortBy);
+    } else {
+      query = query.sort("-createdAt");
+    }
+
+    // 3) field limiting
+
+    if (req.query.fields) {
+      const fields = req.query.fields.split(",").join(" ");
+      query = query.select(fields);
+    } else {
+      query = query.select("-__v");
+    }
 
     /* execute query */
     const tests = await query;
