@@ -38,6 +38,10 @@ const getAllTest = async (req, res) => {
       query = query.select("-__v");
     }
 
+    // 4) Pagination
+
+    query = query.skip(2).limit(10);
+
     /* execute query */
     const tests = await query;
 
