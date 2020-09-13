@@ -1,6 +1,7 @@
 const testModel = require("../model/Test");
 const { db } = require("../model/Test");
 const { json } = require("express");
+const TestModel = require("../model/Test");
 
 const getAllTest = async (req, res) => {
   try {
@@ -40,11 +41,16 @@ const getAllTest = async (req, res) => {
 
     // 4) Pagination
 
-    const page = this.queryString.page * 1 || 1;
-    const limit = this.queryString.limit * 1 || 100;
+    const page = req.query.page * 1 || 1;
+    const limit = req.query.limit * 1 || 100;
     const skip = (page - 1) * limit;
 
-    this.query = this.query.skip(skip).limit(limit);
+    if (req.query.page) {
+      const numTests = await TestModel.countDocuments();
+      if (skip >= numTests) throw new Error("This page does not exist");
+    }
+
+    query = query.skip(skip).limit(limit);
 
     /* execute query */
     const tests = await query;
