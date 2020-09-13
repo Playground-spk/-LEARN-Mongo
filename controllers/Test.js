@@ -3,6 +3,11 @@ const { db } = require("../model/Test");
 const { json } = require("express");
 const TestModel = require("../model/Test");
 
+const aliasTopTests = (req, res, next) => {
+  (req.query.limit = "5"), (req.query.sort = "-ratingsAverage,price");
+  next();
+};
+
 const getAllTest = async (req, res) => {
   try {
     /* build query */
@@ -140,4 +145,11 @@ const deleteTest = async (req, res) => {
   }
 };
 
-module.exports = { createTest, getAllTest, getTest, updateTest, deleteTest };
+module.exports = {
+  createTest,
+  getAllTest,
+  getTest,
+  updateTest,
+  deleteTest,
+  aliasTopTests,
+};
