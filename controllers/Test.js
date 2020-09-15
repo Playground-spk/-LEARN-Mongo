@@ -2,6 +2,7 @@ const testModel = require("../model/Test");
 const { db } = require("../model/Test");
 const { json } = require("express");
 const TestModel = require("../model/Test");
+const APIFeatures = require("../utils/apiFeatures");
 
 const aliasTopTests = (req, res, next) => {
   (req.query.limit = "5"), (req.query.sort = "-ratingsAverage,price");
@@ -10,55 +11,13 @@ const aliasTopTests = (req, res, next) => {
 
 const getAllTest = async (req, res) => {
   try {
-    /* build query */
-    // 1A) filtering
-    const queryObj = { ...req.query };
-    const excludedFields = ["page", "sort", "limit", "fields"];
-    //make queryObj keep only filter object such as {name : 'tare'}
-    excludedFields.forEach((el) => delete queryObj[el]);
-
-    // 1B) advance filtering
-
-    let queryStr = JSON.stringify(queryObj);
-    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
-    queryStr = JSON.parse(queryStr);
-
-    let query = testModel.find(queryStr);
-
-    // 2) Sorting
-
-    if (req.query.sort) {
-      let sortBy = req.query.sort.split(",").join(" ");
-
-      query = query.sort(sortBy);
-    } else {
-      query = query.sort("-createdAt");
-    }
-
-    // 3) field limiting
-
-    if (req.query.fields) {
-      const fields = req.query.fields.split(",").join(" ");
-      query = query.select(fields);
-    } else {
-      query = query.select("-__v");
-    }
-
-    // 4) Pagination
-
-    const page = req.query.page * 1 || 1;
-    const limit = req.query.limit * 1 || 100;
-    const skip = (page - 1) * limit;
-
-    if (req.query.page) {
-      const numTests = await TestModel.countDocuments();
-      if (skip >= numTests) throw new Error("This page does not exist");
-    }
-
-    query = query.skip(skip).limit(limit);
-
     /* execute query */
-    const tests = await query;
+    const apiFeature = new APIFeatures(testModel.find(), req.query)
+      .sort()
+      .field()
+      .filter()
+      .paginate();
+    const tests = await apiFeature.query;
 
     // const test = await testModel
     //   .find()
