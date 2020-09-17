@@ -6,6 +6,8 @@ router
   .route("/top-5-cheaps")
   .get(TestController.aliasTopTests, TestController.getAllTest);
 
+router.route("/test-stats").get(TestController.getTestStats);
+
 router
   .route("/")
   .get(TestController.getAllTest)
