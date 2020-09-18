@@ -141,6 +141,55 @@ const getTestStats = async (req, res) => {
   }
 };
 
+const getMonthlyPlan = async () => {
+  try {
+    const year = req.params.id * 1;
+
+    const plan = await TestModel.aggregate([
+      {
+        $unwind: "$startDates",
+      },
+      {
+        $match: {
+          $startDates: { $gte: new Date(`${year}-01-01`) },
+          $lte: new Date(`${year}-12-31`),
+        },
+      },
+      {
+        $group: {
+          $month: "$startDates",
+          numTourStarts: { $num: 1 },
+          tours: { $push: "$name" },
+        },
+      },
+      {
+        $addFields: { month: "$_id" },
+      },
+      {
+        $project: {
+          _id: 0,
+        },
+      },
+      {
+        $sort: { numTourStarts: -1 },
+      },
+      {
+        $limit: 12,
+      },
+    ]);
+
+    res.status(200).json({
+      status: "success",
+      data: plan,
+    });
+  } catch (error) {
+    res.status(404).json({
+      status: "fail",
+      message: error,
+    });
+  }
+};
+
 module.exports = {
   createTest,
   getAllTest,
